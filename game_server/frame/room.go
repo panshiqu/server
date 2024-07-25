@@ -46,6 +46,15 @@ type Room struct {
 }
 
 func (r *Room) Init(name string) error {
+	n := config.Seat()
+
+	r.users = make([]*User, n, 2*n)
+
+	r.chSitDown = make(chan *SitDown, n)
+	r.chStandUp = make(chan *StandUp, n)
+	r.chUserMsg = make(chan *UserMsg, 4*n)
+	r.chDisband = make(chan int64, n)
+
 	r.logger = slog.With("rid", r.id)
 
 	r.logger.Info("init", slog.String("name", name))
