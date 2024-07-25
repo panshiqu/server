@@ -42,7 +42,7 @@ type Room struct {
 
 	logger *slog.Logger
 
-	timer.TimerHeap
+	timer.Heap
 }
 
 func (r *Room) Init(name string) error {
@@ -59,7 +59,7 @@ func (r *Room) Init(name string) error {
 
 func (r *Room) Logger() *slog.Logger { return r.logger }
 
-func (r *Room) IsEmpty() bool {
+func (r *Room) IsNobody() bool {
 	for _, v := range r.users {
 		if v != nil {
 			return false
