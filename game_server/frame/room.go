@@ -2,6 +2,7 @@ package frame
 
 import (
 	"log/slog"
+	"slices"
 
 	"github.com/panshiqu/golang/pb"
 	"github.com/panshiqu/golang/timer"
@@ -209,9 +210,9 @@ func (r *Room) OnDisband(id int64) {
 	DelRoom(r.id)
 }
 
-func (r *Room) Send(msg *pb.Msg) {
+func (r *Room) Send(msg *pb.Msg, s ...int64) {
 	for _, v := range r.users {
-		if v == nil {
+		if v == nil || slices.Contains(s, v.id) {
 			continue
 		}
 
@@ -221,7 +222,7 @@ func (r *Room) Send(msg *pb.Msg) {
 	}
 }
 
-func (r *Room) SendPb(cmd pb.Cmd, m proto.Message) error {
+func (r *Room) SendPb(cmd pb.Cmd, m proto.Message, s ...int64) error {
 	r.logger.Debug("send pb", cmd.Attr(), slog.Any("m", m))
 
 	data, err := proto.Marshal(m)
@@ -229,7 +230,7 @@ func (r *Room) SendPb(cmd pb.Cmd, m proto.Message) error {
 		return utils.Wrap(err)
 	}
 
-	r.Send(pb.NewMsg(cmd, data))
+	r.Send(pb.NewMsg(cmd, data), s...)
 
 	return nil
 }

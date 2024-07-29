@@ -32,7 +32,7 @@ func (u *User) IsOnline() bool       { return u.online }
 func (u *User) Room() *Room          { return u.room.Load().(*Room) }
 func (u *User) Logger() *slog.Logger { return u.logger }
 
-func (u *User) IsWatcher() bool { return u.seat < config.Seat() }
+func (u *User) IsWatcher() bool { return u.seat >= config.Seat() }
 
 // -= Setter =-
 func (u *User) SetLogger(l *slog.Logger) { u.logger = l.With("uid", u.id) }

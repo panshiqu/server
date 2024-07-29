@@ -20,8 +20,8 @@ type IRoom interface {
 
 	Disband()
 
-	Send(*pb.Msg)
-	SendPb(pb.Cmd, proto.Message) error
+	Send(*pb.Msg, ...int64)
+	SendPb(pb.Cmd, proto.Message, ...int64) error
 
 	Add(time.Duration, func(...any) error, ...any) *timer.Timer
 	AddRepeat(time.Duration, func(...any) error, ...any) *timer.Timer
