@@ -30,10 +30,13 @@ type IRoom interface {
 type IUser interface {
 	ID() int64
 	Seat() int
+	Data() any
 	IsOnline() bool
 	Logger() *slog.Logger
 
 	IsWatcher() bool
+
+	SetData(any)
 
 	StandUp(int)
 
