@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option go_package = "github.com/panshiqu/server/game_server/game/dice";
+
+package dice;
+
+// 开始通知使用 pb.Int64
+// V 表示游戏时长
+
+// 摇骰子请求使用 pb.Int32
+// V >6 解散房间
+// V <0 断开连接
+// V 预设骰子点数
+
+// 摇骰子回复
+message ShakeResponse {
+    int64 UserID = 1;       // 用户编号
+    int32 DicePoints = 2;   // 骰子点数
+}
+
+// 场景通知
+message SceneNotice {
+    bool Status = 1;            // 状态是否游戏中
+    int64 LeftTime = 2;         // 切换状态剩余时间用于倒计时
+    map<int64, int32> Dice = 3; // 用户编号骰子点数，值为0表示游戏中不能看到他人已摇到的点数
+}
+
+// 结算通知
+message SettlementNotice {
+    int64 IdleDuration = 1;     // 空闲时长
+    repeated int64 Winner = 2;  // 多个赢家
+    map<int64, int32> Dice = 3; // 用户编号骰子点数
+}
