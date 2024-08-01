@@ -16,6 +16,9 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+// 自动
+var Auto bool
+
 // 用户编号
 var UserID int64
 
@@ -46,7 +49,15 @@ func Start(onInput func(pb.Network_ConnectClient, string), onMessage func(pb.Net
 	var seat = flag.String("seat", "-1", "seat")
 	var name = flag.String("name", "dice", "game name")
 
+	flag.BoolVar(&Auto, "auto", false, "automatic")
+
 	flag.Parse()
+
+	log.Println("uid:", *uid)
+	log.Println("rid:", *rid)
+	log.Println("seat:", *seat)
+	log.Println("name:", *name)
+	log.Println("auto:", Auto)
 
 	conn, err := grpc.NewClient(":60001", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
