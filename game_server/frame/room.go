@@ -114,7 +114,7 @@ func (r *Room) do() bool {
 	case v := <-r.chStandUp:
 		// 新连接已在老连接断开前坐下
 		if v.stream != v.user.stream {
-			v.user.logger.Info("stand up break")
+			v.user.logger.Info("standup break")
 			break
 		}
 
@@ -128,10 +128,10 @@ func (r *Room) do() bool {
 		return false
 
 	case v := <-r.chUserMsg:
-		v.user.logger.Debug("on message", v.msg.Cmd.Attr())
+		v.user.logger.Debug("onmessage", v.msg.Cmd.Attr())
 
 		if err := r.game.OnMessage(v.user, v.msg); err != nil {
-			v.user.logger.Error("on message", v.msg.Cmd.Attr(), slog.Any("err", err))
+			v.user.logger.Error("onmessage", v.msg.Cmd.Attr(), slog.Any("err", err))
 
 			if err := v.user.SendPb(pb.Cmd_Error, pb.E2er(err, config.IsDev())); err != nil {
 				v.user.logger.Error("error response", slog.Any("err", err))
@@ -156,7 +156,7 @@ func (r *Room) firstSeat() int {
 }
 
 func (r *Room) SitDown(u *User, seat int) {
-	u.logger.Info("sit down", slog.Int("seat", seat))
+	u.logger.Info("sitdown", slog.Int("seat", seat))
 
 	u.online = true
 
@@ -178,7 +178,7 @@ func (r *Room) SitDown(u *User, seat int) {
 }
 
 func (r *Room) StandUp(u *User, reason int) {
-	u.logger.Info("stand up", slog.Int("reason", reason))
+	u.logger.Info("standup", slog.Int("reason", reason))
 
 	u.online = false
 
@@ -187,7 +187,7 @@ func (r *Room) StandUp(u *User, reason int) {
 		return
 	}
 
-	u.logger.Info("stand up delete")
+	u.logger.Info("standup delete")
 
 	r.users[u.seat] = nil
 	u.seat = define.InvalidSeat
@@ -196,7 +196,7 @@ func (r *Room) StandUp(u *User, reason int) {
 }
 
 func (r *Room) OnDisband(id int64) {
-	r.logger.Info("on disband", slog.Int64("id", id))
+	r.logger.Info("ondisband", slog.Int64("id", id))
 
 	r.game.OnDisband(id)
 
@@ -224,7 +224,7 @@ func (r *Room) Send(msg *pb.Msg, s ...int64) {
 }
 
 func (r *Room) SendPb(cmd pb.Cmd, m proto.Message, s ...int64) error {
-	r.logger.Debug("send pb", cmd.Attr(), slog.Any("m", m))
+	r.logger.Debug("sendpb", cmd.Attr(), slog.Any("m", m))
 
 	data, err := proto.Marshal(m)
 	if err != nil {

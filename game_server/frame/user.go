@@ -70,7 +70,7 @@ func (u *User) Send(msg *pb.Msg) error {
 }
 
 func (u *User) SendPb(cmd pb.Cmd, m proto.Message) error {
-	u.logger.Debug("send pb", cmd.Attr(), slog.Any("m", m))
+	u.logger.Debug("sendpb", cmd.Attr(), slog.Any("m", m))
 
 	data, err := proto.Marshal(m)
 	if err != nil {
