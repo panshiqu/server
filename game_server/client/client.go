@@ -83,9 +83,7 @@ func Start(onInput func(pb.Network_ConnectClient, string), onMessage func(pb.Net
 		for {
 			var s string
 			if _, err := fmt.Fscanf(os.Stdin, "%s", &s); err != nil {
-				if err.Error() != "unexpected newline" {
-					log.Fatal(utils.Wrap(err))
-				}
+				log.Println(utils.Wrap(err))
 			}
 			if s != "" {
 				onInput(stream, s)

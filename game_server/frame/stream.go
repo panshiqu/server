@@ -5,7 +5,6 @@ import (
 
 	"github.com/panshiqu/golang/pb"
 	"github.com/panshiqu/golang/utils"
-	"github.com/panshiqu/server/game_server/define"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -31,6 +30,11 @@ func (s *NetworkServer) Connect(stream pb.Network_ConnectServer) error {
 		return utils.Wrap(err)
 	}
 
+	seat, err := pb.MetadataInt[int](md, "seat")
+	if err != nil {
+		return utils.Wrap(err)
+	}
+
 	name, err := pb.MetadataString(md, "game_name")
 	if err != nil {
 		return utils.Wrap(err)
@@ -52,7 +56,7 @@ func (s *NetworkServer) Connect(stream pb.Network_ConnectServer) error {
 	room.chSitDown <- &SitDown{
 		user:   user,
 		stream: stream,
-		seat:   define.InvalidSeat,
+		seat:   seat,
 	}
 
 	defer func() {

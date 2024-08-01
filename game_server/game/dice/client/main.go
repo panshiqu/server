@@ -18,7 +18,7 @@ func onInput(stream pb.Network_ConnectClient, s string) {
 	case strings.HasPrefix(s, "shake"):
 		var n int32
 		if _, err := fmt.Sscanf(s, "shake,%d", &n); err != nil {
-			log.Fatal(utils.Wrap(err))
+			log.Println(utils.Wrap(err))
 		}
 		client.Send(stream, pb.Cmd_DiceShake, pb.NewInt32(n))
 

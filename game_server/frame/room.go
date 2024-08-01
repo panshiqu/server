@@ -1,6 +1,7 @@
 package frame
 
 import (
+	"fmt"
 	"log/slog"
 	"slices"
 
@@ -61,7 +62,7 @@ func (r *Room) Init(name string) error {
 	r.logger.Info("init", slog.String("name", name))
 
 	if r.game = game.New(name); r.game == nil {
-		return define.ErrUnsupportGame
+		return fmt.Errorf("unknown game: %s", name)
 	}
 
 	return utils.Wrap(r.game.Init(r))
@@ -165,8 +166,8 @@ func (r *Room) SitDown(u *User, seat int) {
 		return
 	}
 
-	// 没有指定或指定座位有人则找座
-	if seat == define.InvalidSeat || r.users[seat] != nil {
+	// 座位指定默认、非法、有人则找座
+	if seat <= define.InvalidSeat || seat >= len(r.users) || r.users[seat] != nil {
 		seat = r.firstSeat()
 	}
 
