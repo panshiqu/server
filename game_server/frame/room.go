@@ -133,9 +133,7 @@ func (r *Room) do() bool {
 		if err := r.game.OnMessage(v.user, v.msg); err != nil {
 			v.user.logger.Error("onmessage", v.msg.Cmd.Attr(), slog.Any("err", err))
 
-			if err := v.user.SendPb(pb.Cmd_Error, pb.E2er(err, config.IsDev())); err != nil {
-				v.user.logger.Error("error response", slog.Any("err", err))
-			}
+			v.user.Error(utils.Wrap(v.user.SendPb(pb.Cmd_Error, pb.E2er(err, config.IsDev()))), "error response")
 		}
 
 	case <-r.Check():
@@ -217,9 +215,7 @@ func (r *Room) Send(msg *pb.Msg, s ...int64) {
 			continue
 		}
 
-		if err := v.Send(msg); err != nil {
-			v.logger.Error("send", msg.Cmd.Attr(), slog.Any("err", err))
-		}
+		v.Error(utils.Wrap(v.Send(msg)), "send", msg.Cmd.Attr())
 	}
 }
 

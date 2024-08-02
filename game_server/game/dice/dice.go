@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/panshiqu/golang/logger"
 	"github.com/panshiqu/golang/pb"
 	"github.com/panshiqu/golang/timer"
 	"github.com/panshiqu/golang/utils"
@@ -75,9 +76,7 @@ func (g *Game) sceneNotice(u define.IUser) {
 		notice.Dice = dice
 	}
 
-	if err := u.SendPb(pb.Cmd_DiceScene, notice); err != nil {
-		u.Logger().Error("scene notice", slog.Any("err", err))
-	}
+	u.Error(utils.Wrap(u.SendPb(pb.Cmd_DiceScene, notice)), "scene notice")
 }
 
 func (g *Game) Reconnect(u define.IUser) {
@@ -108,9 +107,7 @@ func (g *Game) StandUp(u define.IUser, reason int) bool {
 func (g *Game) OnDisband(id int64) {
 	// 游戏中解散则提前结算
 	if g.status {
-		if err := g.settlement("disband"); err != nil {
-			g.room.Logger().Error("ondisband settlement", slog.Any("err", err))
-		}
+		logger.Error(utils.Wrap(g.settlement("disband")), g.room.Logger(), "ondisband settlement")
 	}
 }
 
@@ -188,9 +185,7 @@ func (g *Game) shake(u define.IUser, data []byte) error {
 	if len(g.dice) > 1 && g.isAllShaken() {
 		g.timer.Stop()
 
-		if err := g.settlement("shake"); err != nil {
-			g.room.Logger().Error("shake settlement", slog.Any("err", err))
-		}
+		u.Error(utils.Wrap(g.settlement("shake")), "shake settlement")
 	}
 
 	return nil

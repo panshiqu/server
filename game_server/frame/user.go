@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"sync/atomic"
 
+	"github.com/panshiqu/golang/logger"
 	"github.com/panshiqu/golang/pb"
 	"github.com/panshiqu/golang/utils"
 	"github.com/panshiqu/server/game_server/config"
@@ -51,14 +52,14 @@ func (u *User) SetStream(s pb.Network_ConnectServer) {
 }
 
 // -= Function =-
+func (u *User) Error(err error, msg string, args ...any) { logger.Error(err, u.logger, msg, args...) }
+
 func (u *User) StandUp(reason int) { u.Room().StandUp(u, reason) }
 func (u *User) Disband()           { u.Room().chDisband <- u.id }
 
 func (u *User) Disconnect(reason int) {
 	u.logger.Info("disconnect", slog.Int("reason", reason))
-	if err := u.SendPb(pb.Cmd_Disconnect, pb.NewInt32(reason)); err != nil {
-		u.logger.Error("disconnect", slog.Any("err", err))
-	}
+	u.Error(utils.Wrap(u.SendPb(pb.Cmd_Disconnect, pb.NewInt32(reason))), "disconnect")
 }
 
 func (u *User) Send(msg *pb.Msg) error {

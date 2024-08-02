@@ -38,6 +38,8 @@ type IUser interface {
 
 	SetData(any)
 
+	Error(error, string, ...any)
+
 	StandUp(int)
 
 	Disband()
