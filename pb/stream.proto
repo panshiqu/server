@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option go_package = "github.com/panshiqu/server/pb";
+
+package pb;
+
+service Network {
+    rpc Connect(stream Msg) returns (stream Msg) {}
+}
+
+message Msg {
+    Cmd cmd = 1;
+    bytes data = 2;
+}
+
+enum Cmd {
+    Unknown = 0;
+    Error = 1;
+    Disconnect = 2;
+    SitDown = 3;
+    StandUp = 4;
+    Online = 5;
+
+    // -= dice =-
+    DiceScene = 101;        // 场景
+    DiceStart = 102;        // 开始
+    DiceShake = 103;        // 摇骰子
+    DiceSettlement = 104;   // 结算
+}

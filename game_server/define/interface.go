@@ -4,8 +4,8 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/panshiqu/golang/pb"
 	"github.com/panshiqu/golang/timer"
+	"github.com/panshiqu/server/pb"
 	"google.golang.org/protobuf/proto"
 )
 

@@ -5,10 +5,10 @@ import (
 	"sync/atomic"
 
 	"github.com/panshiqu/golang/logger"
-	"github.com/panshiqu/golang/pb"
 	"github.com/panshiqu/golang/utils"
 	"github.com/panshiqu/server/game_server/config"
 	"github.com/panshiqu/server/game_server/define"
+	"github.com/panshiqu/server/pb"
 	"google.golang.org/protobuf/proto"
 )
 

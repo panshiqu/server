@@ -7,9 +7,9 @@ import (
 	"os"
 
 	"github.com/panshiqu/golang/logger"
-	"github.com/panshiqu/golang/pb"
 	"github.com/panshiqu/golang/utils"
 	"github.com/panshiqu/server/game_server/frame"
+	"github.com/panshiqu/server/pb"
 	"google.golang.org/grpc"
 )
 

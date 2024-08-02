@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+option go_package = "github.com/panshiqu/server/pb";
+
+package pb;
+
+enum Err {
+    Success = 0;
+    Fail = 1;
+
+    UnknownCommand = 101; // 未知命令
+    StatusMismatch = 102; // 状态不匹配
+    WatcherOperate = 103; // 旁观操作
+
+    // -= dice =-
+    DiceAlreadyShaken = 10001; // 已经摇过
+}
+
+message ErrorResponse {
+    Err Code = 1;
+    string Desc = 2;
+    string Detail = 3; // 开发环境填充调用路径
+}
+
+message Int32 {
+    int32 V = 1;
+}
+
+message Int64 {
+    int64 V = 1;
+}
+
+message String {
+    string V = 1;
+}
+
+message User {
+    int64 ID = 1;
+    int32 Seat = 2;
+    bool Online = 3;
+}

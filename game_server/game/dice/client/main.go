@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/panshiqu/golang/pb"
 	"github.com/panshiqu/golang/utils"
 	"github.com/panshiqu/server/game_server/client"
 	"github.com/panshiqu/server/game_server/game/dice"
+	"github.com/panshiqu/server/pb"
 )
 
 func onInput(stream pb.Network_ConnectClient, s string) {

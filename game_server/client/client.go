@@ -8,8 +8,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/panshiqu/golang/pb"
 	"github.com/panshiqu/golang/utils"
+	"github.com/panshiqu/server/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"

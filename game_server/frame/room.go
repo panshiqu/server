@@ -5,12 +5,12 @@ import (
 	"log/slog"
 	"slices"
 
-	"github.com/panshiqu/golang/pb"
 	"github.com/panshiqu/golang/timer"
 	"github.com/panshiqu/golang/utils"
 	"github.com/panshiqu/server/game_server/config"
 	"github.com/panshiqu/server/game_server/define"
 	"github.com/panshiqu/server/game_server/game"
+	"github.com/panshiqu/server/pb"
 	"google.golang.org/protobuf/proto"
 )
 

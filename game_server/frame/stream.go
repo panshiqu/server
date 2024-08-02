@@ -3,8 +3,8 @@ package frame
 import (
 	"io"
 
-	"github.com/panshiqu/golang/pb"
 	"github.com/panshiqu/golang/utils"
+	"github.com/panshiqu/server/pb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
