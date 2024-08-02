@@ -107,6 +107,15 @@ func Start(onInput func(pb.Network_ConnectClient, string), onMessage func(pb.Net
 		case pb.Cmd_Disconnect:
 			log.Println("close send", stream.CloseSend())
 
+		case pb.Cmd_SitDown:
+			Recv(in.Cmd, in.Data, &pb.User{})
+
+		case pb.Cmd_StandUp:
+			Recv(in.Cmd, in.Data, &pb.Int64{})
+
+		case pb.Cmd_Online:
+			Recv(in.Cmd, in.Data, &pb.Int64{})
+
 		default:
 			onMessage(stream, in)
 		}

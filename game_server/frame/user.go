@@ -37,6 +37,13 @@ func (u *User) Room() *Room          { return u.room.Load().(*Room) }
 func (u *User) Logger() *slog.Logger { return u.logger }
 
 func (u *User) IsWatcher() bool { return u.seat >= config.Seat() }
+func (u *User) Pb() *pb.User {
+	return &pb.User{
+		ID:     u.id,
+		Seat:   int32(u.seat),
+		Online: u.online,
+	}
+}
 
 // -= Setter =-
 func (u *User) SetData(d any)            { u.data = d }

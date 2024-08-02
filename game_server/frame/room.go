@@ -160,6 +160,8 @@ func (r *Room) SitDown(u *User, seat int) {
 
 	// 有座则重连
 	if u.seat != define.InvalidSeat {
+		u.Error(utils.Wrap(r.SendPb(pb.Cmd_Online, pb.NewInt64(u.id))), "sitdown online")
+
 		r.game.Reconnect(u)
 		return
 	}
@@ -169,8 +171,16 @@ func (r *Room) SitDown(u *User, seat int) {
 		seat = r.firstSeat()
 	}
 
+	for _, v := range r.users {
+		if v != nil {
+			v.Error(utils.Wrap(u.SendPb(pb.Cmd_SitDown, v.Pb())), "sitdown to me")
+		}
+	}
+
 	r.users[seat] = u
 	u.seat = seat
+
+	u.Error(utils.Wrap(r.SendPb(pb.Cmd_SitDown, u.Pb())), "sitdown to others")
 
 	r.game.SitDown(u)
 }
@@ -182,6 +192,8 @@ func (r *Room) StandUp(u *User, reason int) {
 
 	// 通知游戏站起返回是否可以
 	if !r.game.StandUp(u, reason) {
+		u.Error(utils.Wrap(r.SendPb(pb.Cmd_Online, pb.NewInt64(-u.id))), "standup offline")
+
 		return
 	}
 
@@ -189,6 +201,8 @@ func (r *Room) StandUp(u *User, reason int) {
 
 	r.users[u.seat] = nil
 	u.seat = define.InvalidSeat
+
+	u.Error(utils.Wrap(r.SendPb(pb.Cmd_StandUp, pb.NewInt64(u.id))), "standup send")
 
 	DelUser(u.id)
 }
@@ -211,11 +225,9 @@ func (r *Room) OnDisband(id int64) {
 
 func (r *Room) Send(msg *pb.Msg, s ...int64) {
 	for _, v := range r.users {
-		if v == nil || slices.Contains(s, v.id) {
-			continue
+		if v != nil && !slices.Contains(s, v.id) {
+			v.Error(utils.Wrap(v.Send(msg)), "send", msg.Cmd.Attr())
 		}
-
-		v.Error(utils.Wrap(v.Send(msg)), "send", msg.Cmd.Attr())
 	}
 }
 
