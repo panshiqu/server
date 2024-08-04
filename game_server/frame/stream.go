@@ -20,6 +20,12 @@ func (s *NetworkServer) Connect(stream pb.Network_ConnectServer) error {
 		return status.Errorf(codes.DataLoss, "failed to get metadata")
 	}
 
+	if len(md.Get("print")) > 0 {
+		// 更详细的信息请进入房间后无锁打印
+		// 仅打印有哪些房间，哪些用户正在哪个房间
+		return status.Error(codes.Aborted, Print())
+	}
+
 	uid, err := pb.MetadataInt[int64](md, "user_id")
 	if err != nil {
 		return utils.Wrap(err)

@@ -23,7 +23,9 @@ var Auto bool
 var UserID int64
 
 func Send(stream pb.Network_ConnectClient, cmd pb.Cmd, m proto.Message) {
-	log.Println("Send", cmd, m)
+	if cmd != pb.Cmd_Print {
+		log.Println("Send", cmd, m)
+	}
 
 	data, err := proto.Marshal(m)
 	if err != nil {
@@ -40,7 +42,9 @@ func Recv(cmd pb.Cmd, data []byte, m proto.Message) {
 		log.Fatal(utils.Wrap(err))
 	}
 
-	log.Println("Recv", cmd, m)
+	if cmd != pb.Cmd_Print {
+		log.Println("Recv", cmd, m)
+	}
 }
 
 func Start(onInput func(pb.Network_ConnectClient, string), onMessage func(pb.Network_ConnectClient, *pb.Msg)) {
@@ -48,6 +52,7 @@ func Start(onInput func(pb.Network_ConnectClient, string), onMessage func(pb.Net
 	var rid = flag.String("r", "1", "room id")
 	var seat = flag.String("seat", "-1", "seat")
 	var name = flag.String("name", "dice", "game name")
+	var print = flag.Bool("print", false, "print")
 
 	flag.BoolVar(&Auto, "auto", false, "automatic")
 
@@ -58,6 +63,7 @@ func Start(onInput func(pb.Network_ConnectClient, string), onMessage func(pb.Net
 	log.Println("seat:", *seat)
 	log.Println("name:", *name)
 	log.Println("auto:", Auto)
+	log.Println("print:", *print)
 
 	conn, err := grpc.NewClient(":60001", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -68,6 +74,9 @@ func Start(onInput func(pb.Network_ConnectClient, string), onMessage func(pb.Net
 	client := pb.NewNetworkClient(conn)
 
 	md := metadata.Pairs("user_id", *uid, "room_id", *rid, "seat", *seat, "game_name", *name)
+	if *print {
+		md.Set("print", "true")
+	}
 	ctx := metadata.NewOutgoingContext(context.Background(), md)
 	stream, err := client.Connect(ctx)
 	if err != nil {
@@ -85,7 +94,10 @@ func Start(onInput func(pb.Network_ConnectClient, string), onMessage func(pb.Net
 			if _, err := fmt.Fscanf(os.Stdin, "%s", &s); err != nil {
 				log.Println(utils.Wrap(err))
 			}
-			if s != "" {
+
+			if s == "print" {
+				Send(stream, pb.Cmd_Print, nil)
+			} else if s != "" {
 				onInput(stream, s)
 			}
 		}
@@ -115,6 +127,11 @@ func Start(onInput func(pb.Network_ConnectClient, string), onMessage func(pb.Net
 
 		case pb.Cmd_Online:
 			Recv(in.Cmd, in.Data, &pb.Int64{})
+
+		case pb.Cmd_Print:
+			s := &pb.String{}
+			Recv(in.Cmd, in.Data, s)
+			log.Print(s.V)
 
 		default:
 			onMessage(stream, in)

@@ -1,6 +1,8 @@
 package frame
 
 import (
+	"bytes"
+	"fmt"
 	"log/slog"
 	"sync/atomic"
 
@@ -86,4 +88,8 @@ func (u *User) SendPb(cmd pb.Cmd, m proto.Message) error {
 	}
 
 	return utils.Wrap(u.Send(pb.NewMsg(cmd, data)))
+}
+
+func (u *User) Print(buf *bytes.Buffer) {
+	fmt.Fprintf(buf, " uid: %d, seat: %d, online: %v, rid: %d\n", u.id, u.seat, u.online, u.Room().id)
 }

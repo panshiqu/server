@@ -1,6 +1,7 @@
 package frame
 
 import (
+	"bytes"
 	"fmt"
 	"log/slog"
 	"slices"
@@ -128,6 +129,10 @@ func (r *Room) do() bool {
 		return false
 
 	case v := <-r.chUserMsg:
+		if r.Print(v.user, v.msg) {
+			break
+		}
+
 		v.user.logger.Debug("onmessage", v.msg.Cmd.Attr())
 
 		if err := r.game.OnMessage(v.user, v.msg); err != nil {
@@ -242,4 +247,24 @@ func (r *Room) SendPb(cmd pb.Cmd, m proto.Message, s ...int64) error {
 	r.Send(pb.NewMsg(cmd, data), s...)
 
 	return nil
+}
+
+func (r *Room) Print(u *User, m *pb.Msg) bool {
+	if m.Cmd != pb.Cmd_Print {
+		return false
+	}
+
+	var buf bytes.Buffer
+	fmt.Fprintf(&buf, "\nrid: %d, len: %d %d %d %d\n", r.id, len(r.chSitDown), len(r.chStandUp), len(r.chUserMsg), len(r.chDisband))
+	for _, u := range r.users {
+		if u != nil {
+			u.Print(&buf)
+		}
+	}
+
+	r.game.Print(&buf)
+
+	u.Error(utils.Wrap(u.SendPb(pb.Cmd_Print, pb.NewString(buf.String()))), "print")
+
+	return true
 }

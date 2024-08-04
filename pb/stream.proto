@@ -20,6 +20,7 @@ enum Cmd {
     SitDown = 3;
     StandUp = 4;
     Online = 5;
+    Print = 6;
 
     // -= dice =-
     DiceScene = 101;        // 场景

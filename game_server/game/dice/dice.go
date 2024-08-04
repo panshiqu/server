@@ -1,6 +1,7 @@
 package dice
 
 import (
+	"bytes"
 	"fmt"
 	"log/slog"
 	"math/rand"
@@ -256,4 +257,17 @@ func (g *Game) settlement(args ...any) error {
 	g.timer = g.room.Add(IdleDuration, g.start, "timer")
 
 	return nil
+}
+
+func (g *Game) Print(buf *bytes.Buffer) {
+	fmt.Fprintf(buf, "status: %v\ndata:\n", g.status)
+	for i := 0; i < g.room.LenUsers(); i++ {
+		if u := g.room.GetUser(i); u != nil {
+			fmt.Fprintf(buf, " count: %d\n", u.Data().(*Data).count)
+		}
+	}
+	fmt.Fprintln(buf, "dice:")
+	for k, v := range g.dice {
+		fmt.Fprintf(buf, " %d-%d\n", k, v)
+	}
 }

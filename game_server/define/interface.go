@@ -1,6 +1,7 @@
 package define
 
 import (
+	"bytes"
 	"log/slog"
 	"time"
 
@@ -62,4 +63,6 @@ type IGame interface {
 	OnDisband(int64)
 
 	OnMessage(IUser, *pb.Msg) error
+
+	Print(*bytes.Buffer)
 }

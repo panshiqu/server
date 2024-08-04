@@ -1,6 +1,9 @@
 package frame
 
 import (
+	"bytes"
+	"fmt"
+	"log/slog"
 	"sync"
 
 	"github.com/panshiqu/golang/utils"
@@ -92,4 +95,22 @@ func DelUser(id int64) {
 	uMtx.Lock()
 	delete(users, id)
 	uMtx.Unlock()
+}
+
+func Print() string {
+	var buf bytes.Buffer
+	fmt.Fprintln(&buf, "\nroom:")
+	rMtx.Lock()
+	for k := range rooms {
+		fmt.Fprintf(&buf, "r:%d\n", k)
+	}
+	rMtx.Unlock()
+	fmt.Fprintln(&buf, "user:")
+	uMtx.Lock()
+	for _, v := range users {
+		fmt.Fprintf(&buf, "u:%d,r:%d\n", v.id, v.Room().id)
+	}
+	uMtx.Unlock()
+	slog.Debug(buf.String())
+	return buf.String()
 }
