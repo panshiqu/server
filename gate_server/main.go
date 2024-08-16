@@ -27,6 +27,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		conn:   c,
 	}
 
+	// 连接即订阅
 	addSession(ses)
 	defer delSession(ses)
 
@@ -138,5 +139,91 @@ func connect(ctx context.Context, ses *Session, data []byte) (err error) {
 			return utils.Wrap(err)
 		}
 	}
+}
+
+// -= Session =-
+
+var rwmutex sync.RWMutex
+
+// 用户-会话，支持对已连接即订阅的用户推送消息譬如充值
+// 用户多个设备连接保留所有会话，遍历关闭从而优雅退出
+var sessions map[int64][]*Session
+
+func init() {
+	sessions = make(map[int64][]*Session)
+}
+
+func addSession(ses *Session) {
+	rwmutex.Lock()
+	sessions[ses.id] = append(sessions[ses.id], ses)
+	rwmutex.Unlock()
+}
+
+func delSession(ses *Session) {
+	rwmutex.Lock()
+	defer rwmutex.Unlock()
+	sessions[ses.id] = slices.DeleteFunc(sessions[ses.id], func(s *Session) bool {
+		return s == ses
+	})
+}
+
+func Stop() {
+	rwmutex.RLock()
+	defer rwmutex.RUnlock()
+	for _, s := range sessions {
+		for _, v := range s {
+			v.Error(utils.Wrap(v.conn.CloseNow()), "close")
+		}
+	}
+}
+
+// 每个会话最多有两个协程
+// C: 阻塞读客户端消息
+// S: 连接游戏服后阻塞读消息
+type Session struct {
+	// 全局只读仅创建时赋值
+	id     int64
+	logger *slog.Logger
+	conn   *websocket.Conn
+
+	// 协程C只读，使用前总是赋给临时变量后再判空
+	stream pb.Network_ConnectClient
+}
+
+func (s *Session) Error(err error, msg string, args ...any) {
+	logger.Error(err, s.logger, msg, args...)
+}
+
+func (s *Session) Send(cmd pb.Cmd, data []byte) error {
+	stream := s.stream
+	if stream == nil {
+		return errors.New("stream is nil")
+	}
+	return utils.Wrap(stream.Send(pb.NewMsg(cmd, data)))
+}
+
+func (s *Session) Write(ctx context.Context, m *pb.Msg) error {
+	w, err := s.conn.Writer(ctx, websocket.MessageBinary)
+	if err != nil {
+		return utils.Wrap(err)
+	}
+	defer w.Close()
+
+	if err := binary.Write(w, binary.BigEndian, m.Cmd); err != nil {
+		return utils.Wrap(err)
+	}
+	if _, err := w.Write(m.Data); err != nil {
+		return utils.Wrap(err)
+	}
+
+	return nil
+}
+
+func (s *Session) WritePb(ctx context.Context, cmd pb.Cmd, m proto.Message) error {
+	data, err := proto.Marshal(m)
+	if err != nil {
+		return utils.Wrap(err)
+	}
+	return utils.Wrap(s.Write(ctx, pb.NewMsg(cmd, data)))
 }
 
