@@ -39,3 +39,8 @@ message User {
     int32 Seat = 2;
     bool Online = 3;
 }
+
+// 坐下请求（连接游戏）
+message SitDownRequest {
+    map<string, string> Metadata = 1; // 元数据
+}
