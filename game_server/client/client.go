@@ -22,7 +22,9 @@ var Auto bool
 // 用户编号
 var UserID int64
 
-func Send(stream pb.Network_ConnectClient, cmd pb.Cmd, m proto.Message) {
+var stream pb.Network_ConnectClient
+
+func Send(cmd pb.Cmd, m proto.Message) {
 	if cmd != pb.Cmd_Print {
 		log.Println("Send", cmd, m)
 	}
@@ -47,7 +49,7 @@ func Recv(cmd pb.Cmd, data []byte, m proto.Message) {
 	}
 }
 
-func Start(onInput func(pb.Network_ConnectClient, string), onMessage func(pb.Network_ConnectClient, *pb.Msg)) {
+func Start(onInput func(string), onMessage func(*pb.Msg)) {
 	var uid = flag.String("u", "1", "user id")
 	var rid = flag.String("r", "1", "room id")
 	var seat = flag.String("seat", "-1", "seat")
@@ -78,7 +80,7 @@ func Start(onInput func(pb.Network_ConnectClient, string), onMessage func(pb.Net
 		md.Set("print", "true")
 	}
 	ctx := metadata.NewOutgoingContext(context.Background(), md)
-	stream, err := client.Connect(ctx)
+	stream, err = client.Connect(ctx)
 	if err != nil {
 		log.Fatal(utils.Wrap(err))
 	}
@@ -96,9 +98,9 @@ func Start(onInput func(pb.Network_ConnectClient, string), onMessage func(pb.Net
 			}
 
 			if s == "print" {
-				Send(stream, pb.Cmd_Print, nil)
+				Send(pb.Cmd_Print, nil)
 			} else if s != "" {
-				onInput(stream, s)
+				onInput(s)
 			}
 		}
 	}()
@@ -134,7 +136,7 @@ func Start(onInput func(pb.Network_ConnectClient, string), onMessage func(pb.Net
 			log.Print(s.V)
 
 		default:
-			onMessage(stream, in)
+			onMessage(in)
 		}
 	}
 }

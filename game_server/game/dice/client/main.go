@@ -13,21 +13,21 @@ import (
 	"github.com/panshiqu/server/pb"
 )
 
-func onInput(stream pb.Network_ConnectClient, s string) {
+func onInput(s string) {
 	switch {
 	case strings.HasPrefix(s, "shake"):
 		var n int32
 		if _, err := fmt.Sscanf(s, "shake,%d", &n); err != nil {
 			log.Println(utils.Wrap(err))
 		}
-		client.Send(stream, pb.Cmd_DiceShake, pb.NewInt32(n))
+		client.Send(pb.Cmd_DiceShake, pb.NewInt32(n))
 
 	default:
 		log.Println("unknown input:", s)
 	}
 }
 
-func onMessage(stream pb.Network_ConnectClient, m *pb.Msg) {
+func onMessage(m *pb.Msg) {
 	switch m.Cmd {
 	case pb.Cmd_DiceScene:
 		notice := &dice.SceneNotice{}
@@ -39,7 +39,7 @@ func onMessage(stream pb.Network_ConnectClient, m *pb.Msg) {
 		}
 
 		time.AfterFunc(time.Duration(rand.Int63n(notice.LeftTime/2))*time.Millisecond, func() {
-			client.Send(stream, pb.Cmd_DiceShake, nil)
+			client.Send(pb.Cmd_DiceShake, nil)
 		})
 
 	case pb.Cmd_DiceStart:
@@ -51,7 +51,7 @@ func onMessage(stream pb.Network_ConnectClient, m *pb.Msg) {
 		}
 
 		time.AfterFunc(time.Duration(rand.Int63n(n.V/2))*time.Millisecond, func() {
-			client.Send(stream, pb.Cmd_DiceShake, nil)
+			client.Send(pb.Cmd_DiceShake, nil)
 		})
 
 	case pb.Cmd_DiceShake:
