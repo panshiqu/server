@@ -5,6 +5,8 @@ go 1.22.4
 replace github.com/panshiqu/golang => ../golang
 
 require (
+	github.com/coder/websocket v1.8.12
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/panshiqu/golang v0.0.0-00010101000000-000000000000
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2

@@ -1,10 +1,35 @@
+package main
+
+import (
+	"context"
+	"encoding/base64"
+	"encoding/binary"
+	"errors"
+	"fmt"
+	"io"
+	"log"
+	"log/slog"
+	"net"
+	"net/http"
+	"os"
+	"slices"
+	"sync"
+
+	"github.com/coder/websocket"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/panshiqu/golang/logger"
+	"github.com/panshiqu/golang/utils"
+	"github.com/panshiqu/server/config"
+	"github.com/panshiqu/server/pb"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/proto"
+)
 
 var wg sync.WaitGroup
 
-type server struct {
-}
-
-func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func serve(w http.ResponseWriter, r *http.Request) {
 	wg.Add(1)
 	defer wg.Done()
 
@@ -139,6 +164,31 @@ func connect(ctx context.Context, ses *Session, data []byte) (err error) {
 			return utils.Wrap(err)
 		}
 	}
+}
+
+func main() {
+	l, err := net.Listen("tcp", ":60006")
+	if err != nil {
+		log.Fatal(utils.Wrap(err))
+	}
+
+	logger.Init()
+
+	s := &http.Server{}
+
+	http.HandleFunc("/", serve)
+
+	go func() {
+		utils.WaitSignal(os.Interrupt)
+
+		slog.Info("shutdown", slog.Any("err", s.Shutdown(context.Background())))
+
+		Stop()
+	}()
+
+	slog.Info("serve", slog.Any("err", s.Serve(l)))
+
+	wg.Wait()
 }
 
 // -= Session =-
