@@ -227,3 +227,26 @@ func (s *Session) WritePb(ctx context.Context, cmd pb.Cmd, m proto.Message) erro
 	return utils.Wrap(s.Write(ctx, pb.NewMsg(cmd, data)))
 }
 
+// -= Function =-
+
+func jwtParse(s string) (int64, error) {
+	token, err := jwt.Parse(s, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return base64.StdEncoding.DecodeString(os.Getenv("JWT_KEY"))
+	})
+	if err != nil {
+		return 0, utils.Wrap(err)
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return 0, errors.New("claims assert")
+	}
+	id, ok := claims["id"].(float64)
+	if !ok {
+		return 0, errors.New("id assert")
+	}
+	return int64(id), nil
+}
