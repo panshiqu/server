@@ -8,8 +8,9 @@ import (
 	"time"
 
 	"github.com/panshiqu/golang/utils"
-	"github.com/panshiqu/server/game_server/client"
+	// "github.com/panshiqu/server/game_server/client"
 	"github.com/panshiqu/server/game_server/game/dice"
+	"github.com/panshiqu/server/gate_server/client"
 	"github.com/panshiqu/server/pb"
 )
 

@@ -2,17 +2,15 @@ package client
 
 import (
 	"context"
+	"encoding/binary"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
 
+	"github.com/coder/websocket"
 	"github.com/panshiqu/golang/utils"
 	"github.com/panshiqu/server/pb"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -22,7 +20,7 @@ var Auto bool
 // 用户编号
 var UserID int64
 
-var stream pb.Network_ConnectClient
+var conn *websocket.Conn
 
 func Send(cmd pb.Cmd, m proto.Message) {
 	if cmd != pb.Cmd_Print {
@@ -34,7 +32,16 @@ func Send(cmd pb.Cmd, m proto.Message) {
 		log.Fatal(utils.Wrap(err))
 	}
 
-	if err := stream.Send(pb.NewMsg(cmd, data)); err != nil {
+	w, err := conn.Writer(context.Background(), websocket.MessageBinary)
+	if err != nil {
+		log.Fatal(utils.Wrap(err))
+	}
+	defer w.Close()
+
+	if err := binary.Write(w, binary.BigEndian, cmd); err != nil {
+		log.Fatal(utils.Wrap(err))
+	}
+	if _, err := w.Write(data); err != nil {
 		log.Fatal(utils.Wrap(err))
 	}
 }
@@ -55,6 +62,7 @@ func Start(onInput func(string), onMessage func(*pb.Msg)) {
 	var seat = flag.String("seat", "-1", "seat")
 	var name = flag.String("name", "dice", "game name")
 	var print = flag.Bool("print", false, "print")
+	var token = flag.String("token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MX0.teQ2o406CHCk91dbp2D3p6ErkfIOELXlyKTkgMiPUT8", "token")
 
 	flag.BoolVar(&Auto, "auto", false, "automatic")
 
@@ -67,23 +75,12 @@ func Start(onInput func(string), onMessage func(*pb.Msg)) {
 	log.Println("auto:", Auto)
 	log.Println("print:", *print)
 
-	conn, err := grpc.NewClient(":60001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	var err error
+	conn, _, err = websocket.Dial(context.Background(), fmt.Sprintf("ws://:60006?token=%s", *token), nil)
 	if err != nil {
 		log.Fatal(utils.Wrap(err))
 	}
-	defer conn.Close()
-
-	client := pb.NewNetworkClient(conn)
-
-	md := metadata.Pairs("user_id", *uid, "room_id", *rid, "seat", *seat, "game_name", *name)
-	if *print {
-		md.Set("print", "true")
-	}
-	ctx := metadata.NewOutgoingContext(context.Background(), md)
-	stream, err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(utils.Wrap(err))
-	}
+	defer conn.CloseNow()
 
 	UserID, err = utils.String2Int[int64](*uid)
 	if err != nil {
@@ -99,6 +96,20 @@ func Start(onInput func(string), onMessage func(*pb.Msg)) {
 
 			if s == "print" {
 				Send(pb.Cmd_Print, nil)
+			} else if s == "sitdown" {
+				req := &pb.SitDownRequest{
+					Metadata: map[string]string{
+						"room_id":   *rid,
+						"seat":      *seat,
+						"game_name": *name,
+					},
+				}
+				if *print {
+					req.Metadata["print"] = "true"
+				}
+				Send(pb.Cmd_SitDown, req)
+			} else if s == "standup" {
+				Send(pb.Cmd_StandUp, nil)
 			} else if s != "" {
 				onInput(s)
 			}
@@ -108,24 +119,28 @@ func Start(onInput func(string), onMessage func(*pb.Msg)) {
 	go func() {
 		utils.WaitSignal(os.Interrupt)
 
-		log.Println("close send", stream.CloseSend())
+		log.Println("close", conn.Close(websocket.StatusNormalClosure, ""))
 	}()
 
 	for {
-		in, err := stream.Recv()
-		if err == io.EOF {
+		_, data, err := conn.Read(context.Background())
+		if websocket.CloseStatus(err) == websocket.StatusNormalClosure {
 			return
 		}
 		if err != nil {
 			log.Fatal(utils.Wrap(err))
 		}
 
+		cmd := pb.Cmd(binary.BigEndian.Uint32(data))
+
+		in := pb.NewMsg(cmd, data[4:])
+
 		switch in.Cmd {
 		case pb.Cmd_Error:
 			Recv(in.Cmd, in.Data, &pb.ErrorResponse{})
 
 		case pb.Cmd_Disconnect:
-			log.Println("close send", stream.CloseSend())
+			Recv(in.Cmd, in.Data, &pb.Int32{})
 
 		case pb.Cmd_SitDown:
 			Recv(in.Cmd, in.Data, &pb.User{})
