@@ -137,6 +137,7 @@ func Start(onInput func(string), onMessage func(*pb.Msg)) {
 
 		switch in.Cmd {
 		case pb.Cmd_Error:
+			// todo print
 			Recv(in.Cmd, in.Data, &pb.ErrorResponse{})
 
 		case pb.Cmd_Disconnect:
