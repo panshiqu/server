@@ -1,3 +1,4 @@
+// Can be compared with gate_server/client
 package client
 
 import (
@@ -114,7 +115,7 @@ func Start(onInput func(string), onMessage func(*pb.Msg)) {
 	for {
 		in, err := stream.Recv()
 		if err == io.EOF {
-			return
+			break
 		}
 		if err != nil {
 			log.Fatal(utils.Wrap(err))

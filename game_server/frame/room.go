@@ -197,7 +197,7 @@ func (r *Room) StandUp(u *User, reason int) {
 
 	// 通知游戏站起返回是否可以
 	if !r.game.StandUp(u, reason) {
-		u.Error(utils.Wrap(r.SendPb(pb.Cmd_Online, pb.NewInt64(-u.id))), "standup offline")
+		u.Error(utils.Wrap(r.SendPb(pb.Cmd_Online, pb.NewInt64(-u.id), u.id)), "standup offline")
 
 		return
 	}

@@ -1,3 +1,4 @@
+// Can be compared with game_server/client
 package client
 
 import (
@@ -125,7 +126,7 @@ func Start(onInput func(string), onMessage func(*pb.Msg)) {
 	for {
 		_, data, err := conn.Read(context.Background())
 		if websocket.CloseStatus(err) == websocket.StatusNormalClosure {
-			return
+			break
 		}
 		if err != nil {
 			log.Fatal(utils.Wrap(err))
@@ -137,7 +138,6 @@ func Start(onInput func(string), onMessage func(*pb.Msg)) {
 
 		switch in.Cmd {
 		case pb.Cmd_Error:
-			// todo print
 			Recv(in.Cmd, in.Data, &pb.ErrorResponse{})
 
 		case pb.Cmd_Disconnect:
