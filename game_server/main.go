@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"syscall"
 
 	"github.com/panshiqu/golang/logger"
 	"github.com/panshiqu/golang/utils"
@@ -26,7 +27,7 @@ func main() {
 	pb.RegisterNetworkServer(s, &frame.NetworkServer{})
 
 	go func() {
-		utils.WaitSignal(os.Interrupt)
+		utils.WaitSignal(os.Interrupt, syscall.SIGTERM)
 
 		frame.Stop()
 

@@ -14,6 +14,7 @@ import (
 	"os"
 	"slices"
 	"sync"
+	"syscall"
 
 	"github.com/coder/websocket"
 	"github.com/golang-jwt/jwt/v5"
@@ -179,7 +180,7 @@ func main() {
 	http.HandleFunc("/", serve)
 
 	go func() {
-		utils.WaitSignal(os.Interrupt)
+		utils.WaitSignal(os.Interrupt, syscall.SIGTERM)
 
 		slog.Info("shutdown", slog.Any("err", s.Shutdown(context.Background())))
 
