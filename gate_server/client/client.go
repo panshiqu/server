@@ -64,6 +64,7 @@ func Start(onInput func(string), onMessage func(*pb.Msg)) {
 	var name = flag.String("name", "dice", "game name")
 	var print = flag.Bool("print", false, "print")
 	var token = flag.String("token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MX0.teQ2o406CHCk91dbp2D3p6ErkfIOELXlyKTkgMiPUT8", "token")
+	var port = flag.Int("port", 60006, "port")
 
 	flag.BoolVar(&Auto, "auto", false, "automatic")
 
@@ -77,7 +78,7 @@ func Start(onInput func(string), onMessage func(*pb.Msg)) {
 	log.Println("print:", *print)
 
 	var err error
-	conn, _, err = websocket.Dial(context.Background(), fmt.Sprintf("ws://:60006?token=%s", *token), nil)
+	conn, _, err = websocket.Dial(context.Background(), fmt.Sprintf("ws://:%d?token=%s", *port, *token), nil)
 	if err != nil {
 		log.Fatal(utils.Wrap(err))
 	}

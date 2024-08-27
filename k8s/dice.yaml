@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dice
+spec:
+  clusterIP: None
+  ports:
+  - port: 60001
+  selector:
+    game: dice
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dice
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      game: dice
+  serviceName: dice
+  template:
+    metadata:
+      labels:
+        game: dice
+    spec:
+      containers:
+      - image: panshiqu/game_server:1.0
+        name: game
+        ports:
+        - containerPort: 60001
+        volumeMounts:
+        - mountPath: /work
+          name: work
+  volumeClaimTemplates:
+  - metadata:
+      name: work
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
