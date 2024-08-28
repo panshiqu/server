@@ -70,15 +70,15 @@ spec:
               fieldRef:
                 fieldPath: spec.nodeName
           - name:  FLUENT_ELASTICSEARCH_HOST
-            value: "elasticsearch-logging"
+            value: "quickstart-es-http.default"
           - name:  FLUENT_ELASTICSEARCH_PORT
             value: "9200"
           - name: FLUENT_ELASTICSEARCH_SCHEME
-            value: "http"
+            value: "https"
           # Option to configure elasticsearch plugin with self signed certs
           # ================================================================
           - name: FLUENT_ELASTICSEARCH_SSL_VERIFY
-            value: "true"
+            value: "false"
           # Option to configure elasticsearch plugin with tls
           # ================================================================
           - name: FLUENT_ELASTICSEARCH_SSL_VERSION
@@ -88,7 +88,19 @@ spec:
           - name: FLUENT_ELASTICSEARCH_USER
             value: "elastic"
           - name: FLUENT_ELASTICSEARCH_PASSWORD
-            value: "changeme"
+            value: "password"
+          - name: FLUENTD_SYSTEMD_CONF
+            value: "disable"
+          - name: FLUENT_ELASTICSEARCH_LOGSTASH_PREFIX
+            value: "fluentd"
+          - name: FLUENT_KUBERNETES_METADATA_SKIP_LABELS
+            value: "true"
+          - name: FLUENT_KUBERNETES_METADATA_SKIP_CONTAINER_METADATA
+            value: "true"
+          - name: FLUENT_KUBERNETES_METADATA_SKIP_MASTER_URL
+            value: "true"
+          - name: FLUENT_KUBERNETES_METADATA_SKIP_NAMESPACE_METADATA
+            value: "true"
         resources:
           limits:
             memory: 200Mi
@@ -99,23 +111,23 @@ spec:
         - name: varlog
           mountPath: /var/log
         # When actual pod logs in /var/lib/docker/containers, the following lines should be used.
-        # - name: dockercontainerlogdirectory
-        #   mountPath: /var/lib/docker/containers
-        #   readOnly: true
-        # When actual pod logs in /var/log/pods, the following lines should be used.
         - name: dockercontainerlogdirectory
-          mountPath: /var/log/pods
+          mountPath: /var/lib/docker/containers
           readOnly: true
+        # When actual pod logs in /var/log/pods, the following lines should be used.
+        # - name: dockercontainerlogdirectory
+        #   mountPath: /var/log/pods
+        #   readOnly: true
       terminationGracePeriodSeconds: 30
       volumes:
       - name: varlog
         hostPath:
           path: /var/log
       # When actual pod logs in /var/lib/docker/containers, the following lines should be used.
-      # - name: dockercontainerlogdirectory
-      #   hostPath:
-      #     path: /var/lib/docker/containers
-      # When actual pod logs in /var/log/pods, the following lines should be used.
       - name: dockercontainerlogdirectory
         hostPath:
-          path: /var/log/pods
+          path: /var/lib/docker/containers
+      # When actual pod logs in /var/log/pods, the following lines should be used.
+      # - name: dockercontainerlogdirectory
+      #   hostPath:
+      #     path: /var/log/pods
