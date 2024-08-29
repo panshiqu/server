@@ -167,6 +167,9 @@ func connect(ctx context.Context, ses *Session, data []byte) (err error) {
 	}
 }
 
+// -ldflags "-X main.version=1.1"
+var version string
+
 func main() {
 	l, err := net.Listen("tcp", ":60006")
 	if err != nil {
@@ -174,6 +177,8 @@ func main() {
 	}
 
 	logger.Init()
+
+	config.Init(version)
 
 	s := &http.Server{}
 

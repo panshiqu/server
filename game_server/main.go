@@ -9,10 +9,14 @@ import (
 
 	"github.com/panshiqu/golang/logger"
 	"github.com/panshiqu/golang/utils"
+	"github.com/panshiqu/server/config"
 	"github.com/panshiqu/server/game_server/frame"
 	"github.com/panshiqu/server/pb"
 	"google.golang.org/grpc"
 )
+
+// -ldflags "-X main.version=1.1"
+var version string
 
 func main() {
 	l, err := net.Listen("tcp", ":60001")
@@ -21,6 +25,8 @@ func main() {
 	}
 
 	logger.Init()
+
+	config.Init(version)
 
 	s := grpc.NewServer()
 

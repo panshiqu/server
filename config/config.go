@@ -2,6 +2,8 @@ package config
 
 import (
 	"cmp"
+	"log/slog"
+	"time"
 )
 
 var base Base
@@ -25,4 +27,17 @@ func IsProd() bool {
 
 func Seat() int {
 	return cmp.Or(base.Seat, 4)
+}
+
+func Init(version string) {
+	args := make([]any, 0, 4)
+	if version != "" {
+		args = append(args, slog.String("version", version))
+	}
+
+	args = append(args, slog.String("env", cmp.Or(base.Env, "dev")))
+
+	args = append(args, slog.Int("year", time.Now().Year()))
+
+	slog.Info("init", args...)
 }
