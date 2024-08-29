@@ -167,7 +167,7 @@ func connect(ctx context.Context, ses *Session, data []byte) (err error) {
 	}
 }
 
-// -ldflags "-X main.version=1.1"
+// -ldflags "-X main.version=v1.1"
 var version string
 
 func main() {

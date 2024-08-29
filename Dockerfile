@@ -23,6 +23,9 @@ RUN --mount=type=cache,target=/go/pkg/mod/ \
 # Placing it here allows the previous steps to be cached across architectures.
 ARG TARGETARCH
 
+# App version
+ARG VERSION=v0.0
+
 # Target server: game, gate, web, match etc.
 ARG SERVER=game_server
 
@@ -32,7 +35,7 @@ ARG SERVER=game_server
 # source code into the container.
 RUN --mount=type=cache,target=/go/pkg/mod/ \
     --mount=type=bind,target=. \
-    CGO_ENABLED=0 GOARCH=$TARGETARCH go build -o /bin/server $SERVER/main.go
+    CGO_ENABLED=0 GOARCH=$TARGETARCH go build -ldflags "-X main.version=$VERSION" -o /bin/server $SERVER/main.go
 
 ################################################################################
 # Create a new stage for running the application that contains the minimal

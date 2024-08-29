@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-// -ldflags "-X main.version=1.1"
+// -ldflags "-X main.version=v1.1"
 var version string
 
 func main() {
