@@ -35,6 +35,12 @@ func main() {
 	go func() {
 		utils.WaitSignal(os.Interrupt, syscall.SIGTERM)
 
+		go func() {
+			utils.WaitSignal(os.Interrupt, syscall.SIGTERM)
+
+			frame.Disband()
+		}()
+
 		frame.Stop()
 
 		s.GracefulStop()

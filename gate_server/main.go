@@ -202,7 +202,7 @@ func main() {
 var rwmutex sync.RWMutex
 
 // 用户-会话，支持对已连接即订阅的用户推送消息譬如充值
-// 用户多个设备连接保留所有会话，遍历关闭从而优雅退出
+// 用户多个设备连接保留所有会话，遍历关闭从而优雅停服
 var sessions map[int64][]*Session
 
 func init() {

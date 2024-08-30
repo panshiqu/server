@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
+	"sync/atomic"
 
 	"github.com/panshiqu/golang/utils"
 	"github.com/panshiqu/server/game_server/define"
@@ -15,7 +16,7 @@ var rMtx sync.Mutex
 var rooms map[int64]*Room
 
 // 停服后不创建房间
-var stopped bool
+var stopped atomic.Bool
 
 // 等待所有房间协程
 var wgRoom sync.WaitGroup
@@ -38,7 +39,7 @@ func NewRoom(id int64, name string) (*Room, error) {
 		return r, nil
 	}
 
-	if stopped {
+	if stopped.Load() {
 		return nil, define.ErrServerStopped
 	}
 
@@ -63,16 +64,19 @@ func DelRoom(id int64) {
 }
 
 func Stop() {
+	stopped.Store(true)
+
+	wgRoom.Wait()
+}
+
+func Disband() {
 	rMtx.Lock()
-	stopped = true
+	defer rMtx.Unlock()
 
 	// 解散现有房间
 	for _, v := range rooms {
 		v.chDisband <- define.DisbandSystem
 	}
-	rMtx.Unlock()
-
-	wgRoom.Wait()
 }
 
 func NewUser(id int64) *User {

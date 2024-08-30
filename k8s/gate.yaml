@@ -24,7 +24,7 @@ spec:
         app: gate
     spec:
       containers:
-      - image: panshiqu/gate_server:1.0
+      - image: panshiqu/gate_server:1.2
         name: gate
         env:
         # kubectl create secret generic jwt --from-literal=key=ZGVmYXVsdF9rZXk=

@@ -24,11 +24,23 @@ spec:
       labels:
         game: dice
     spec:
+      terminationGracePeriodSeconds: 150
       containers:
-      - image: panshiqu/game_server:1.0
+      - image: panshiqu/game_server:1.2
         name: game
         ports:
         - containerPort: 60001
+        lifecycle:
+          preStop:
+            exec:
+              # killall发送SIGTERM，开始计时
+              # 等到A：2分钟（sleep 120）系统发送SIGTERM
+              # 等到B：2分半（terminationGracePeriodSeconds）系统发送SIGKILL
+              # 若B远小于A，B时发送SIGTERM，B+2时发送SIGKILL，宽限延长2秒
+              command:
+              - sh
+              - -c
+              - killall server && sleep 120
         volumeMounts:
         - mountPath: /work
           name: work
