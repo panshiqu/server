@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dice
+spec:
+  clusterIP: None
+  ports:
+  - port: 60001
+  selector:
+    game: dice
+    group: a
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dice-a
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      game: dice
+      group: a
+  serviceName: dice
+  template:
+    metadata:
+      labels:
+        game: dice
+        group: a
+    spec:
+      containers:
+      - image: panshiqu/game_server:1.2
+        name: game
+        ports:
+        - containerPort: 60001
+        lifecycle:
+          preStop:
+            exec:
+              # killall发送SIGTERM，系统再发送实现不等待快速停服
+              command:
+              - sh
+              - -c
+              - killall server
+        volumeMounts:
+        - mountPath: /work
+          name: work
+  volumeClaimTemplates:
+  - metadata:
+      name: work
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dice-b
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      game: dice
+      group: b
+  serviceName: dice
+  template:
+    metadata:
+      labels:
+        game: dice
+        group: b
+    spec:
+      containers:
+      - image: panshiqu/game_server:1.2
+        name: game
+        ports:
+        - containerPort: 60001
+        lifecycle:
+          preStop:
+            exec:
+              # killall发送SIGTERM，系统再发送实现不等待快速停服
+              command:
+              - sh
+              - -c
+              - killall server
+        volumeMounts:
+        - mountPath: /work
+          name: work
+  volumeClaimTemplates:
+  - metadata:
+      name: work
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
