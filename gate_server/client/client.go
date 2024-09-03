@@ -65,6 +65,7 @@ func Start(onInput func(string), onMessage func(*pb.Msg)) {
 	var print = flag.Bool("print", false, "print")
 	var token = flag.String("token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MX0.teQ2o406CHCk91dbp2D3p6ErkfIOELXlyKTkgMiPUT8", "token")
 	var port = flag.Int("port", 60006, "port")
+	var ip = flag.String("ip", "127.0.0.1", "ip")
 
 	flag.BoolVar(&Auto, "auto", false, "automatic")
 
@@ -76,9 +77,11 @@ func Start(onInput func(string), onMessage func(*pb.Msg)) {
 	log.Println("name:", *name)
 	log.Println("auto:", Auto)
 	log.Println("print:", *print)
+	log.Println("port:", *port)
+	log.Println("ip:", *ip)
 
 	var err error
-	conn, _, err = websocket.Dial(context.Background(), fmt.Sprintf("ws://:%d?token=%s", *port, *token), nil)
+	conn, _, err = websocket.Dial(context.Background(), fmt.Sprintf("ws://%s:%d?token=%s", *ip, *port, *token), nil)
 	if err != nil {
 		log.Fatal(utils.Wrap(err))
 	}

@@ -56,6 +56,7 @@ func Start(onInput func(string), onMessage func(*pb.Msg)) {
 	var seat = flag.String("seat", "-1", "seat")
 	var name = flag.String("name", "dice", "game name")
 	var print = flag.Bool("print", false, "print")
+	var ip = flag.String("ip", "127.0.0.1", "ip")
 
 	flag.BoolVar(&Auto, "auto", false, "automatic")
 
@@ -67,8 +68,9 @@ func Start(onInput func(string), onMessage func(*pb.Msg)) {
 	log.Println("name:", *name)
 	log.Println("auto:", Auto)
 	log.Println("print:", *print)
+	log.Println("ip:", *ip)
 
-	conn, err := grpc.NewClient(":60001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(fmt.Sprintf("%s:60001", *ip), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(utils.Wrap(err))
 	}
